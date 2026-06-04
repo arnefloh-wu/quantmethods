@@ -357,6 +357,31 @@ def answer_sheet(questions, solution=False):
              "Antwortbogen / Answer Sheet")
     elems.append(_p(title, "sheet_title"))
     elems.append(_hr(1.5, BLUE))
+    elems.append(_sp(0.2))
+
+    # Name / student ID fields (student version only; solution version shows label instead)
+    if not solution:
+        name_row = Table(
+            [[_p("Name:", "header_label"),
+              _p("_" * 52, "header_line"),
+              _p("Matrikelnummer / Student ID:", "header_label"),
+              _p("_" * 20, "header_line")]],
+            colWidths=[2.0*cm, 8.5*cm, 5.5*cm, 3.2*cm],
+        )
+        name_row.setStyle(TableStyle([
+            ("VALIGN",        (0,0),(-1,-1), "BOTTOM"),
+            ("LEFTPADDING",   (0,0),(-1,-1), 0),
+            ("RIGHTPADDING",  (0,0),(-1,-1), 4),
+            ("BOTTOMPADDING", (0,0),(-1,-1), 2),
+        ]))
+        elems.append(name_row)
+    else:
+        elems.append(_p(
+            "<b>LÖSUNG / SOLUTION — Nur für Lehrende / For instructors only</b>",
+            "sol_warn",
+        ))
+
+    elems.append(_hr(0.8, MGRAY))
     elems.append(_sp(0.3))
 
     # Build two side-by-side sub-tables (Q1-10 left, Q11-20 right) for compact layout
