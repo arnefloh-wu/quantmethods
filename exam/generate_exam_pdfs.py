@@ -263,16 +263,18 @@ def header_block():
     ]
     name_row = Table(
         [[_p("Name:", "header_label"),
-          _p("_" * 70, "header_line"),
+          _p(" ", "header_line"),
           _p("Student ID:", "header_label"),
-          _p("_" * 22, "header_line")]],
-        colWidths=[2.0*cm, 11.5*cm, 2.5*cm, 3.2*cm],
+          _p(" ", "header_line")]],
+        colWidths=[2.0*cm, 10.5*cm, 2.5*cm, 4.2*cm],
     )
     name_row.setStyle(TableStyle([
-        ("VALIGN", (0,0),(-1,-1), "BOTTOM"),
-        ("LEFTPADDING",  (0,0),(-1,-1), 0),
-        ("RIGHTPADDING", (0,0),(-1,-1), 4),
-        ("BOTTOMPADDING",(0,0),(-1,-1), 2),
+        ("VALIGN",        (0,0),(-1,-1), "BOTTOM"),
+        ("LEFTPADDING",   (0,0),(-1,-1), 0),
+        ("RIGHTPADDING",  (0,0),(-1,-1), 6),
+        ("BOTTOMPADDING", (0,0),(-1,-1), 3),
+        ("LINEBELOW",     (1,0),(1,0), 0.8, DGRAY),
+        ("LINEBELOW",     (3,0),(3,0), 0.8, DGRAY),
     ]))
     elems.append(name_row)
     elems.append(_sp(0.12))
@@ -360,16 +362,18 @@ def answer_sheet(questions, solution=False):
     if not solution:
         name_row = Table(
             [[_p("Name:", "header_label"),
-              _p("_" * 42, "header_line"),
+              _p(" ", "header_line"),
               _p("Student ID:", "header_label"),
-              _p("_" * 14, "header_line")]],
-            colWidths=[2.0*cm, 8.0*cm, 2.5*cm, 3.2*cm],
+              _p(" ", "header_line")]],
+            colWidths=[2.0*cm, 10.5*cm, 2.5*cm, 4.2*cm],
         )
         name_row.setStyle(TableStyle([
             ("VALIGN",        (0,0),(-1,-1), "BOTTOM"),
             ("LEFTPADDING",   (0,0),(-1,-1), 0),
-            ("RIGHTPADDING",  (0,0),(-1,-1), 4),
-            ("BOTTOMPADDING", (0,0),(-1,-1), 2),
+            ("RIGHTPADDING",  (0,0),(-1,-1), 6),
+            ("BOTTOMPADDING", (0,0),(-1,-1), 3),
+            ("LINEBELOW",     (1,0),(1,0), 0.8, DGRAY),
+            ("LINEBELOW",     (3,0),(3,0), 0.8, DGRAY),
         ]))
         elems.append(name_row)
     else:
