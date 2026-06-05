@@ -322,17 +322,13 @@ def question_block(idx, q, solution=False, first_in_topic=False, topic=None):
 
     for i, (ode, oen) in enumerate(zip(opts_de, opts_en)):
         is_c = solution and (i == correct)
-        tick  = "✔" if is_c else "☐"
-        tcol  = GREEN.hexval() if is_c else DGRAY.hexval()
         ds    = "opt_de_c" if is_c else "opt_de"
         es    = "opt_en_c" if is_c else "opt_en"
-        ls    = ds
 
         row = Table(
-            [[_p(f'<font color="{tcol}">{tick}</font>', "opt_de"),
-              _p(f"<b>{OPTION_LETTERS[i]})</b>", ls),
+            [[_p(f"<b>{OPTION_LETTERS[i]})</b>", ds),
               [_p(ode, ds), _p(oen, es)]]],
-            colWidths=[0.55*cm, 0.85*cm, 17.8*cm],
+            colWidths=[0.85*cm, 18.35*cm],
         )
         row.setStyle(TableStyle([
             ("VALIGN",        (0,0),(-1,-1), "TOP"),
@@ -364,10 +360,10 @@ def answer_sheet(questions, solution=False):
     if not solution:
         name_row = Table(
             [[_p("Name:", "header_label"),
-              _p("_" * 70, "header_line"),
+              _p("_" * 42, "header_line"),
               _p("Student ID:", "header_label"),
-              _p("_" * 22, "header_line")]],
-            colWidths=[2.0*cm, 11.5*cm, 2.5*cm, 3.2*cm],
+              _p("_" * 14, "header_line")]],
+            colWidths=[2.0*cm, 8.0*cm, 2.5*cm, 3.2*cm],
         )
         name_row.setStyle(TableStyle([
             ("VALIGN",        (0,0),(-1,-1), "BOTTOM"),
