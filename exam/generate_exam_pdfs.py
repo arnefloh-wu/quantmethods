@@ -255,17 +255,18 @@ def _hr(thick=1.0, col=MGRAY): return HRFlowable(width="100%", thickness=thick, 
 def header_block():
     elems = [
         _p("Quantitative Methods — Exam / Prüfung", "title"),
-        _p("WU Vienna &nbsp;·&nbsp; Dr. Arne Floh", "subtitle"),
         _sp(0.25),
+        _p("WU Vienna &nbsp;·&nbsp; Dr. Arne Floh", "subtitle"),
+        _sp(0.35),
         _hr(1.5, BLUE),
-        _sp(0.2),
+        _sp(0.25),
     ]
     name_row = Table(
         [[_p("Name:", "header_label"),
-          _p("_" * 52, "header_line"),
-          _p("Matrikelnummer / Student ID:", "header_label"),
-          _p("_" * 20, "header_line")]],
-        colWidths=[2.0*cm, 8.5*cm, 5.5*cm, 3.2*cm],
+          _p("_" * 70, "header_line"),
+          _p("Student ID:", "header_label"),
+          _p("_" * 22, "header_line")]],
+        colWidths=[2.0*cm, 11.5*cm, 2.5*cm, 3.2*cm],
     )
     name_row.setStyle(TableStyle([
         ("VALIGN", (0,0),(-1,-1), "BOTTOM"),
@@ -363,10 +364,10 @@ def answer_sheet(questions, solution=False):
     if not solution:
         name_row = Table(
             [[_p("Name:", "header_label"),
-              _p("_" * 52, "header_line"),
-              _p("Matrikelnummer / Student ID:", "header_label"),
-              _p("_" * 20, "header_line")]],
-            colWidths=[2.0*cm, 8.5*cm, 5.5*cm, 3.2*cm],
+              _p("_" * 70, "header_line"),
+              _p("Student ID:", "header_label"),
+              _p("_" * 22, "header_line")]],
+            colWidths=[2.0*cm, 11.5*cm, 2.5*cm, 3.2*cm],
         )
         name_row.setStyle(TableStyle([
             ("VALIGN",        (0,0),(-1,-1), "BOTTOM"),
@@ -402,7 +403,7 @@ def answer_sheet(questions, solution=False):
                 if solution and i == correct:
                     cell = _p(OPTION_LETTERS[i], "sheet_cell_c")
                 else:
-                    cell = _p("☐", "sheet_cell")
+                    cell = _p("", "sheet_cell")
                 row.append(cell)
             rows.append(row)
 
