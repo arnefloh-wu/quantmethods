@@ -605,7 +605,8 @@ def shuffle_version(questions, seed):
 def make_styles(ver_color):
     return {
         "title":      ParagraphStyle("title",      fontSize=17, fontName="LibSans-Bold",   textColor=ver_color, alignment=TA_CENTER, spaceAfter=3),
-        "ver_badge":  ParagraphStyle("ver_badge",  fontSize=28, fontName="LibSans-Bold",   textColor=ver_color, alignment=TA_CENTER),
+        "ver_label":  ParagraphStyle("ver_label",  fontSize=10, fontName="LibSans-Bold",   textColor=white, alignment=TA_CENTER, leading=12),
+        "ver_badge":  ParagraphStyle("ver_badge",  fontSize=26, fontName="LibSans-Bold",   textColor=white, alignment=TA_CENTER, leading=28),
         "subtitle":   ParagraphStyle("subtitle",   fontSize=10, fontName="LibSans",        textColor=DGRAY, alignment=TA_CENTER, spaceAfter=2),
         "section":    ParagraphStyle("section",    fontSize=9,  fontName="LibSans-Bold",   textColor=white, leading=12),
         "qnum":       ParagraphStyle("qnum",       fontSize=10, fontName="LibSans-Bold",   textColor=ver_color, spaceBefore=3, spaceAfter=1),
@@ -637,12 +638,25 @@ def header_block(version, S, vc):
     title_col = [Paragraph("Quantitative Methods — Exam / Prüfung", S["title"]),
                  _sp(0.25),
                  Paragraph("WU Vienna &nbsp;·&nbsp; Dr. Arne Floh", S["subtitle"])]
-    top = Table([[title_col, Paragraph(f"Version&nbsp;{version}", S["ver_badge"])]],
-                colWidths=[15.5*cm, 3.7*cm])
+    # Version badge: filled colour box with "VERSION" over a large letter
+    badge = Table([[Paragraph("VERSION", S["ver_label"])],
+                   [Paragraph(version, S["ver_badge"])]],
+                  colWidths=[3.0*cm])
+    badge.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,-1),vc),
+                               ("VALIGN",(0,0),(-1,-1),"MIDDLE"),
+                               ("ALIGN",(0,0),(-1,-1),"CENTER"),
+                               ("LEFTPADDING",(0,0),(-1,-1),4),
+                               ("RIGHTPADDING",(0,0),(-1,-1),4),
+                               ("TOPPADDING",(0,0),(0,0),5),
+                               ("BOTTOMPADDING",(0,0),(0,0),0),
+                               ("TOPPADDING",(0,1),(0,1),0),
+                               ("BOTTOMPADDING",(0,1),(0,1),6)]))
+    top = Table([[title_col, badge]],
+                colWidths=[15.7*cm, 3.5*cm])
     top.setStyle(TableStyle([("VALIGN",(0,0),(-1,-1),"MIDDLE"),
+                              ("ALIGN",(1,0),(1,0),"RIGHT"),
                               ("LEFTPADDING",(0,0),(-1,-1),0),
-                              ("RIGHTPADDING",(0,0),(-1,-1),0),
-                              ("LINERIGHT",(0,0),(0,0),1,MGRAY)]))
+                              ("RIGHTPADDING",(0,0),(-1,-1),0)]))
     elems = [top, _sp(0.3), _hr(2.0, vc), _sp(0.25)]
 
     nr = Table([[Paragraph("Name:", S["hdr_label"]), Paragraph(" ", S["hdr_line"]),
