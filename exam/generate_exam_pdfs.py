@@ -1,34 +1,43 @@
 """
-Generate bilingual (DE/EN) exam PDFs:
-  - exam_student.pdf  : student version with tick boxes, name field, answer sheet
-  - exam_solution.pdf : instructor solution key with correct answers marked
+Generate parallel bilingual (DE/EN) exam PDFs — Versions A, B, C.
+
+Each version tests identical knowledge with the same 20 questions, but:
+  - Question order is shuffled within each topic section
+  - Answer options (A–D) are shuffled per question per version
+This keeps exams fair and comparable while preventing copying.
+
+Output files:
+  exam-mc-questions/exam_student_A.pdf   exam_solution_A.pdf
+  exam-mc-questions/exam_student_B.pdf   exam_solution_B.pdf
+  exam-mc-questions/exam_student_C.pdf   exam_solution_C.pdf
 """
 
+import os, random
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
+from reportlab.lib.enums import TA_CENTER
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
     HRFlowable, KeepTogether, PageBreak,
 )
 from reportlab.lib.colors import HexColor, black, white
 
-# ── colour palette ──────────────────────────────────────────────────────────
-BLUE  = HexColor("#1a3a6b")
-LBLUE = HexColor("#d0d9ea")
-LGRAY = HexColor("#f4f4f4")
-MGRAY = HexColor("#dddddd")
-DGRAY = HexColor("#555555")
-GREEN = HexColor("#1a7a3a")
+# ── colour palette ───────────────────────────────────────────────────────────
+BLUE   = HexColor("#1a3a6b")
+LGRAY  = HexColor("#f4f4f4")
+MGRAY  = HexColor("#dddddd")
+DGRAY  = HexColor("#555555")
+GREEN  = HexColor("#1a7a3a")
 LGREEN = HexColor("#d4edda")
-RED   = HexColor("#cc0000")
+RED    = HexColor("#cc0000")
 
-# ── 20 questions (4 per topic) – bilingual DE / EN ───────────────────────────
-# Each entry:
-#   (topic, question_de, question_en, [opts_de x4], [opts_en x4], correct_index 0-3)
+VERSION_COLORS = {"A": HexColor("#1a3a6b"), "B": HexColor("#7b1a1a"), "C": HexColor("#1a5c1a")}
+
+# ── Master question pool (4 per topic, 5 topics = 20 total) ─────────────────
+# (topic, question_de, question_en, [opts_de x4], [opts_en x4], correct_index)
 QUESTIONS = [
-    # ── STATISTICS ──────────────────────────────────────────────────────────
+    # ── STATISTICS ───────────────────────────────────────────────────────────
     (
         "Statistik / Statistics",
         "Welche Messskala erlaubt nur die Identifikation und Klassifikation von Objekten, impliziert jedoch keine Rangordnung oder Abstände?",
@@ -61,7 +70,7 @@ QUESTIONS = [
         ["Chi-square test", "Logistic regression", "t-test or ANOVA", "Spearman correlation"],
         2,
     ),
-    # ── REGRESSION ──────────────────────────────────────────────────────────
+    # ── REGRESSION ───────────────────────────────────────────────────────────
     (
         "Regressionsanalyse / Regression Analysis",
         "In einem einfachen linearen Regressionsmodell Y = b₀ + b₁X + ε steht der Term ε für:",
@@ -90,11 +99,11 @@ QUESTIONS = [
         "Regressionsanalyse / Regression Analysis",
         "Eine Preiselastizität von −2,21 bedeutet:",
         "A price elasticity of −2.21 means:",
-        ["Ein Preisanstieg von 1 % führt zu einem Rückgang der Nachfrage um 2,21 Einheiten", "Ein Preisanstieg von 1 % führt zu einem Rückgang der Nachfrage um 2,21 %", "Ein Preisanstieg von 2,21 % führt zu einem Nachfragerückgang von 1 %", "Die Nachfrage ist unelastisch"],
+        ["Ein Preisanstieg von 1 % führt zu einem Rückgang der Nachfrage um 2,21 Einheiten", "Ein Preisanstieg von 1 % führt zu einem Rückgang der Nachfrage um 2,21 %", "Ein Preisanstieg von 2,21 % führt zu einem Nachfragerückgang von 1 %", "Die Nachfrage ist unelastisch"],
         ["A 1% price increase leads to a 2.21-unit decrease in demand", "A 1% price increase leads to a 2.21% decrease in demand", "A 2.21% price increase leads to a 1% decrease in demand", "Demand is inelastic"],
         1,
     ),
-    # ── MEDIATION & MODERATION ───────────────────────────────────────────────
+    # ── MEDIATION & MODERATION ────────────────────────────────────────────────
     (
         "Mediation & Moderation",
         "Gemäß Zhao, Lynch & Chen (2010): Was ist die einzige statistische Voraussetzung für den Nachweis von Mediation?",
@@ -127,7 +136,7 @@ QUESTIONS = [
         ["X has no effect on Y", "The effect of X on Y does not depend on the level of W", "W has no main effect on Y", "The model is misspecified"],
         1,
     ),
-    # ── SURVEY RESEARCH ──────────────────────────────────────────────────────
+    # ── SURVEY RESEARCH ───────────────────────────────────────────────────────
     (
         "Survey-Forschung / Survey Research",
         "Common Method Bias (CMB) tritt am wahrscheinlichsten auf, wenn:",
@@ -160,7 +169,7 @@ QUESTIONS = [
         ["The minimum number of items per construct", "The minimum sample size needed relative to the number of parameters estimated in a model", "The maximum number of constructs in a survey", "The number of pilot test participants required"],
         1,
     ),
-    # ── INTERNATIONAL MARKETING ──────────────────────────────────────────────
+    # ── INTERNATIONAL MARKETING ───────────────────────────────────────────────
     (
         "Internationales Marketing / International Marketing",
         "Konstruktäquivalenz in kulturvergleichender Forschung ist gegeben, wenn:",
@@ -195,19 +204,59 @@ QUESTIONS = [
     ),
 ]
 
-OPTION_LETTERS = ["A", "B", "C", "D"]
+LETTERS = ["A", "B", "C", "D"]
+
+# Fixed seeds per version — guarantees identical PDFs on every regeneration
+VERSION_SEEDS = {"A": 101, "B": 202, "C": 303}
+
+
+# ── Version shuffling ─────────────────────────────────────────────────────────
+def make_version(questions, seed):
+    """
+    Return a shuffled copy of questions:
+      - Question order shuffled within each topic group
+      - Answer options reshuffled per question (correct index updated accordingly)
+    """
+    rng = random.Random(seed)
+
+    # Group by topic (preserving topic order)
+    topics_seen = []
+    grouped = {}
+    for q in questions:
+        t = q[0]
+        if t not in grouped:
+            grouped[t] = []
+            topics_seen.append(t)
+        grouped[t].append(q)
+
+    result = []
+    for t in topics_seen:
+        qs = list(grouped[t])
+        rng.shuffle(qs)
+        for q in qs:
+            topic, qde, qen, opts_de, opts_en, correct = q
+            order = list(range(4))
+            rng.shuffle(order)
+            new_opts_de  = [opts_de[i]  for i in order]
+            new_opts_en  = [opts_en[i]  for i in order]
+            new_correct  = order.index(correct)
+            result.append((topic, qde, qen, new_opts_de, new_opts_en, new_correct))
+    return result
+
 
 # ── Styles ────────────────────────────────────────────────────────────────────
-def make_styles():
+def make_styles(ver_color):
     return {
         "title": ParagraphStyle("title", fontSize=17, fontName="Helvetica-Bold",
-                                textColor=BLUE, alignment=TA_CENTER, spaceAfter=3),
+                                textColor=ver_color, alignment=TA_CENTER, spaceAfter=3),
+        "version_badge": ParagraphStyle("version_badge", fontSize=28, fontName="Helvetica-Bold",
+                                        textColor=ver_color, alignment=TA_CENTER, spaceAfter=0),
         "subtitle": ParagraphStyle("subtitle", fontSize=10, fontName="Helvetica",
                                    textColor=DGRAY, alignment=TA_CENTER, spaceAfter=2),
         "section": ParagraphStyle("section", fontSize=9, fontName="Helvetica-Bold",
                                   textColor=white, leading=12),
         "qnum": ParagraphStyle("qnum", fontSize=10, fontName="Helvetica-Bold",
-                               textColor=BLUE, spaceBefore=3, spaceAfter=1),
+                               textColor=ver_color, spaceBefore=3, spaceAfter=1),
         "qde": ParagraphStyle("qde", fontSize=10, fontName="Helvetica-Bold",
                               textColor=black, leading=13, spaceAfter=2),
         "qen": ParagraphStyle("qen", fontSize=8.5, fontName="Helvetica-Oblique",
@@ -228,10 +277,10 @@ def make_styles():
                                  textColor=DGRAY, alignment=TA_CENTER),
         "sol_warn": ParagraphStyle("sol_warn", fontSize=10, fontName="Helvetica-Bold",
                                    textColor=RED, alignment=TA_CENTER,
-                                   spaceBefore=4, spaceAfter=8),
-        "sheet_title": ParagraphStyle("sheet_title", fontSize=13, fontName="Helvetica-Bold",
-                                      textColor=BLUE, alignment=TA_CENTER,
-                                      spaceBefore=0, spaceAfter=6),
+                                   spaceBefore=4, spaceAfter=6),
+        "sheet_title": ParagraphStyle("sheet_title", fontSize=12, fontName="Helvetica-Bold",
+                                      textColor=ver_color, alignment=TA_CENTER,
+                                      spaceBefore=0, spaceAfter=5),
         "sheet_hdr": ParagraphStyle("sheet_hdr", fontSize=9, fontName="Helvetica-Bold",
                                     textColor=white, alignment=TA_CENTER, leading=11),
         "sheet_cell": ParagraphStyle("sheet_cell", fontSize=9, fontName="Helvetica",
@@ -239,33 +288,42 @@ def make_styles():
         "sheet_cell_c": ParagraphStyle("sheet_cell_c", fontSize=10, fontName="Helvetica-Bold",
                                        textColor=white, alignment=TA_CENTER, leading=11),
         "sheet_q": ParagraphStyle("sheet_q", fontSize=9, fontName="Helvetica-Bold",
-                                  textColor=BLUE, alignment=TA_CENTER, leading=11),
+                                  textColor=ver_color, alignment=TA_CENTER, leading=11),
     }
 
-S = make_styles()
 
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
-def _p(text, style): return Paragraph(text, S[style])
 def _sp(h=0.2): return Spacer(1, h * cm)
 def _hr(thick=1.0, col=MGRAY): return HRFlowable(width="100%", thickness=thick, color=col)
 
 
-# ── Page header block ─────────────────────────────────────────────────────────
-def header_block():
-    elems = [
-        _p("Quantitative Methods — Exam / Prüfung", "title"),
+# ── Page 1 header ─────────────────────────────────────────────────────────────
+def header_block(version, S, ver_color):
+    # Title + version badge side by side
+    title_cell = [
+        Paragraph("Quantitative Methods — Exam / Prüfung", S["title"]),
         _sp(0.25),
-        _p("WU Vienna &nbsp;·&nbsp; Dr. Arne Floh", "subtitle"),
-        _sp(0.35),
-        _hr(1.5, BLUE),
-        _sp(0.25),
+        Paragraph("WU Vienna &nbsp;·&nbsp; Dr. Arne Floh", S["subtitle"]),
     ]
+    badge_cell = Paragraph(f"Version&nbsp;{version}", S["version_badge"])
+
+    top = Table(
+        [[title_cell, badge_cell]],
+        colWidths=[15.5*cm, 3.7*cm],
+    )
+    top.setStyle(TableStyle([
+        ("VALIGN", (0,0),(-1,-1), "MIDDLE"),
+        ("LEFTPADDING",  (0,0),(-1,-1), 0),
+        ("RIGHTPADDING", (0,0),(-1,-1), 0),
+        ("LINERIGHT", (0,0),(0,0), 1, MGRAY),
+    ]))
+
+    elems = [top, _sp(0.3), _hr(2.0, ver_color), _sp(0.25)]
+
     name_row = Table(
-        [[_p("Name:", "header_label"),
-          _p(" ", "header_line"),
-          _p("Student ID:", "header_label"),
-          _p(" ", "header_line")]],
+        [[Paragraph("Name:", S["header_label"]),
+          Paragraph(" ", S["header_line"]),
+          Paragraph("Student ID:", S["header_label"]),
+          Paragraph(" ", S["header_line"])]],
         colWidths=[2.0*cm, 10.5*cm, 2.5*cm, 4.2*cm],
     )
     name_row.setStyle(TableStyle([
@@ -279,28 +337,30 @@ def header_block():
     elems.append(name_row)
     elems.append(_sp(0.12))
 
-    instr_row = Table(
-        [[_p("Instructions / Anweisungen:", "header_label"),
-          _p("Select exactly ONE answer per question by ticking the corresponding box. &nbsp;|&nbsp; "
-             "Bitte genau EINE Antwort pro Frage ankreuzen.", "header_line")]],
+    instr = Table(
+        [[Paragraph("Instructions / Anweisungen:", S["header_label"]),
+          Paragraph(
+              "Select exactly ONE answer per question. &nbsp;|&nbsp; "
+              "Bitte genau EINE Antwort pro Frage ankreuzen.",
+              S["header_line"])]],
         colWidths=[4.8*cm, 14.4*cm],
     )
-    instr_row.setStyle(TableStyle([
+    instr.setStyle(TableStyle([
         ("VALIGN", (0,0),(-1,-1), "TOP"),
         ("LEFTPADDING",  (0,0),(-1,-1), 0),
         ("RIGHTPADDING", (0,0),(-1,-1), 0),
     ]))
-    elems.append(instr_row)
+    elems.append(instr)
     elems.append(_hr(1.0, MGRAY))
     elems.append(_sp(0.15))
     return elems
 
 
 # ── Topic banner ──────────────────────────────────────────────────────────────
-def topic_banner(topic):
-    t = Table([[_p(topic, "section")]], colWidths=[19.2*cm])
+def topic_banner(topic, ver_color, S):
+    t = Table([[Paragraph(topic, S["section"])]], colWidths=[19.2*cm])
     t.setStyle(TableStyle([
-        ("BACKGROUND",    (0,0),(-1,-1), BLUE),
+        ("BACKGROUND",    (0,0),(-1,-1), ver_color),
         ("TOPPADDING",    (0,0),(-1,-1), 5),
         ("BOTTOMPADDING", (0,0),(-1,-1), 5),
         ("LEFTPADDING",   (0,0),(-1,-1), 6),
@@ -308,28 +368,27 @@ def topic_banner(topic):
     return t
 
 
-# ── Single question block (returns a KeepTogether) ────────────────────────────
-def question_block(idx, q, solution=False, first_in_topic=False, topic=None):
-    """Return a KeepTogether containing (optional banner +) question + all answers."""
-    topic_str, qde, qen, opts_de, opts_en, correct = q
+# ── Question block (KeepTogether) ─────────────────────────────────────────────
+def question_block(idx, q, S, ver_color, solution=False, first_in_topic=False):
+    topic, qde, qen, opts_de, opts_en, correct = q
     inner = []
 
     if first_in_topic:
-        inner.append(topic_banner(topic_str))
+        inner.append(topic_banner(topic, ver_color, S))
         inner.append(_sp(0.12))
 
-    inner.append(_p(f"Frage / Question {idx}", "qnum"))
-    inner.append(_p(qde, "qde"))
-    inner.append(_p(qen, "qen"))
+    inner.append(Paragraph(f"Frage / Question {idx}", S["qnum"]))
+    inner.append(Paragraph(qde, S["qde"]))
+    inner.append(Paragraph(qen, S["qen"]))
 
     for i, (ode, oen) in enumerate(zip(opts_de, opts_en)):
         is_c = solution and (i == correct)
-        ds    = "opt_de_c" if is_c else "opt_de"
-        es    = "opt_en_c" if is_c else "opt_en"
+        ds = "opt_de_c" if is_c else "opt_de"
+        es = "opt_en_c" if is_c else "opt_en"
 
         row = Table(
-            [[_p(f"<b>{OPTION_LETTERS[i]})</b>", ds),
-              [_p(ode, ds), _p(oen, es)]]],
+            [[Paragraph(f"<b>{LETTERS[i]})</b>", S[ds]),
+              [Paragraph(ode, S[ds]), Paragraph(oen, S[es])]]],
             colWidths=[0.85*cm, 18.35*cm],
         )
         row.setStyle(TableStyle([
@@ -346,25 +405,23 @@ def question_block(idx, q, solution=False, first_in_topic=False, topic=None):
     return KeepTogether(inner)
 
 
-# ── Answer-sheet table (last page) ───────────────────────────────────────────
-def answer_sheet(questions, solution=False):
-    """Return a list of flowables: page break + answer grid."""
+# ── Answer sheet (last page) ──────────────────────────────────────────────────
+def answer_sheet(version, questions, S, ver_color, solution=False):
     elems = [PageBreak()]
 
-    title = ("Antwortbogen / Answer Sheet — Lösungsschlüssel / Solution Key"
+    title = (f"Version {version} — Lösungsschlüssel / Solution Key"
              if solution else
-             "Antwortbogen / Answer Sheet")
-    elems.append(_p(title, "sheet_title"))
-    elems.append(_hr(1.5, BLUE))
+             f"Version {version} — Antwortbogen / Answer Sheet")
+    elems.append(Paragraph(title, S["sheet_title"]))
+    elems.append(_hr(1.5, ver_color))
     elems.append(_sp(0.2))
 
-    # Name / student ID fields (student version only; solution version shows label instead)
     if not solution:
         name_row = Table(
-            [[_p("Name:", "header_label"),
-              _p(" ", "header_line"),
-              _p("Student ID:", "header_label"),
-              _p(" ", "header_line")]],
+            [[Paragraph("Name:", S["header_label"]),
+              Paragraph(" ", S["header_line"]),
+              Paragraph("Student ID:", S["header_label"]),
+              Paragraph(" ", S["header_line"])]],
             colWidths=[2.0*cm, 10.5*cm, 2.5*cm, 4.2*cm],
         )
         name_row.setStyle(TableStyle([
@@ -377,41 +434,28 @@ def answer_sheet(questions, solution=False):
         ]))
         elems.append(name_row)
     else:
-        elems.append(_p(
+        elems.append(Paragraph(
             "<b>LÖSUNG / SOLUTION — Nur für Lehrende / For instructors only</b>",
-            "sol_warn",
+            S["sol_warn"],
         ))
 
     elems.append(_hr(0.8, MGRAY))
     elems.append(_sp(0.3))
 
-    # Build two side-by-side sub-tables (Q1-10 left, Q11-20 right) for compact layout
-    def half_table(qs_slice, start_idx):
-        """qs_slice: list of (q_idx_1based, question_tuple)"""
-        hdr = [
-            _p("Frage/Q", "sheet_hdr"),
-            _p("A", "sheet_hdr"),
-            _p("B", "sheet_hdr"),
-            _p("C", "sheet_hdr"),
-            _p("D", "sheet_hdr"),
-        ]
+    def half_table(qs_slice):
+        hdr = [Paragraph(h, S["sheet_hdr"]) for h in ["Frage/Q", "A", "B", "C", "D"]]
         rows = [hdr]
         for q_num, q in qs_slice:
-            correct = q[5]
-            row = [_p(str(q_num), "sheet_q")]
+            c = q[5]
+            row = [Paragraph(str(q_num), S["sheet_q"])]
             for i in range(4):
-                if solution and i == correct:
-                    cell = _p(OPTION_LETTERS[i], "sheet_cell_c")
-                else:
-                    cell = _p("", "sheet_cell")
-                row.append(cell)
+                row.append(Paragraph(LETTERS[i] if (solution and i == c) else " ", S["sheet_cell_c"] if (solution and i == c) else S["sheet_cell"]))
             rows.append(row)
 
         col_w = [1.6*cm, 1.4*cm, 1.4*cm, 1.4*cm, 1.4*cm]
         t = Table(rows, colWidths=col_w, repeatRows=1)
-
-        style_cmds = [
-            ("BACKGROUND",    (0,0),(-1,0), BLUE),
+        cmds = [
+            ("BACKGROUND",    (0,0),(-1,0), ver_color),
             ("TEXTCOLOR",     (0,0),(-1,0), white),
             ("FONTNAME",      (0,0),(-1,0), "Helvetica-Bold"),
             ("FONTSIZE",      (0,0),(-1,-1), 9),
@@ -419,100 +463,94 @@ def answer_sheet(questions, solution=False):
             ("VALIGN",        (0,0),(-1,-1), "MIDDLE"),
             ("ROWBACKGROUNDS",(0,1),(-1,-1), [LGRAY, white]),
             ("GRID",          (0,0),(-1,-1), 0.5, MGRAY),
-            ("TOPPADDING",    (0,0),(-1,-1), 5),
-            ("BOTTOMPADDING", (0,0),(-1,-1), 5),
+            ("TOPPADDING",    (0,0),(-1,-1), 6),
+            ("BOTTOMPADDING", (0,0),(-1,-1), 6),
         ]
         if solution:
             for row_i, (_, q) in enumerate(qs_slice, 1):
-                correct = q[5]
-                col_i = correct + 1
-                style_cmds += [
-                    ("BACKGROUND", (col_i, row_i),(col_i, row_i), GREEN),
-                    ("TEXTCOLOR",  (col_i, row_i),(col_i, row_i), white),
+                c = q[5]
+                cmds += [
+                    ("BACKGROUND", (c+1, row_i),(c+1, row_i), GREEN),
+                    ("TEXTCOLOR",  (c+1, row_i),(c+1, row_i), white),
                 ]
-        t.setStyle(TableStyle(style_cmds))
+        t.setStyle(TableStyle(cmds))
         return t
 
-    left  = list(enumerate(questions[:10],  start=1))
-    right = list(enumerate(questions[10:],  start=11))
+    indexed = list(enumerate(questions, 1))
+    left_t  = half_table(indexed[:10])
+    right_t = half_table(indexed[10:])
 
-    left_t  = half_table(left,  1)
-    right_t = half_table(right, 11)
-
-    gap = _sp(0.6)
     combined = Table(
-        [[left_t, gap, right_t]],
+        [[left_t, Spacer(1, 1*cm), right_t]],
         colWidths=[7.2*cm, 1.2*cm, 7.2*cm],
     )
     combined.setStyle(TableStyle([
-        ("VALIGN", (0,0),(-1,-1), "TOP"),
+        ("VALIGN",       (0,0),(-1,-1), "TOP"),
         ("LEFTPADDING",  (0,0),(-1,-1), 0),
         ("RIGHTPADDING", (0,0),(-1,-1), 0),
     ]))
-
     elems.append(combined)
 
     if not solution:
-        elems.append(_sp(0.6))
-        elems.append(_hr(0.8, MGRAY))
-        elems.append(_sp(0.15))
-        elems.append(_p(
-            "Bitte nur EINE Antwort pro Zeile ankreuzen. &nbsp;|&nbsp; "
-            "Please tick exactly ONE box per row.",
-            "footer",
-        ))
+        elems += [_sp(0.5), _hr(0.8, MGRAY), _sp(0.15),
+                  Paragraph("Bitte nur EINE Antwort pro Zeile ankreuzen. &nbsp;|&nbsp; "
+                            "Please tick exactly ONE box per row.", S["footer"])]
     return elems
 
 
-# ── Build PDF ─────────────────────────────────────────────────────────────────
-def build_pdf(path, questions, solution=False):
+# ── Build one PDF ─────────────────────────────────────────────────────────────
+def build_pdf(path, version, questions, solution=False):
+    ver_color = VERSION_COLORS[version]
+    S = make_styles(ver_color)
+
     doc = SimpleDocTemplate(
         path, pagesize=A4,
         leftMargin=1.5*cm, rightMargin=1.5*cm,
         topMargin=1.5*cm,  bottomMargin=1.8*cm,
     )
-    story = list(header_block())
+    story = header_block(version, S, ver_color)
 
     if solution:
-        story.append(_p(
-            "<b>LÖSUNG / SOLUTION — Nur für Lehrende / For instructors only</b>",
-            "sol_warn",
+        story.append(Paragraph(
+            f"<b>LÖSUNG / SOLUTION Version {version} — Nur für Lehrende / For instructors only</b>",
+            S["sol_warn"],
         ))
 
     current_topic = None
     for idx, q in enumerate(questions, 1):
-        t = q[0]
-        first = (t != current_topic)
-        story.append(question_block(idx, q, solution=solution,
-                                    first_in_topic=first, topic=t))
-        current_topic = t
+        first = (q[0] != current_topic)
+        story.append(question_block(idx, q, S, ver_color,
+                                    solution=solution, first_in_topic=first))
+        current_topic = q[0]
 
-    # Answer sheet on its own page
-    story += answer_sheet(questions, solution=solution)
+    story += answer_sheet(version, questions, S, ver_color, solution=solution)
 
-    # Running footer via canvas callback
     label = "Lösungsschlüssel" if solution else "Prüfungsbogen"
 
-    def add_footer(canvas, doc):
+    def footer(canvas, doc):
         canvas.saveState()
         canvas.setFont("Helvetica", 7)
         canvas.setFillColor(DGRAY)
         w, _ = A4
         canvas.drawCentredString(
-            w / 2, 1.0 * cm,
-            f"WU Vienna · Quantitative Methods · {label} · 20 Fragen / Questions  —  Seite / Page {doc.page}",
+            w/2, 1.0*cm,
+            f"WU Vienna · Quantitative Methods · Version {version} · {label} · 20 Fragen/Questions  —  Seite/Page {doc.page}",
         )
         canvas.restoreState()
 
-    doc.build(story, onFirstPage=add_footer, onLaterPages=add_footer)
-    print(f"Written: {path}")
+    doc.build(story, onFirstPage=footer, onLaterPages=footer)
+    print(f"  Written: {path}")
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    import os
-    out_dir = "/home/user/quantmethods/exam/exam-mc-questions"
-    os.makedirs(out_dir, exist_ok=True)
-    build_pdf(f"{out_dir}/exam_student.pdf",  QUESTIONS, solution=False)
-    build_pdf(f"{out_dir}/exam_solution.pdf", QUESTIONS, solution=True)
-    print("Done.")
+    out = "/home/user/quantmethods/exam/exam-mc-questions"
+    os.makedirs(out, exist_ok=True)
+
+    for ver, seed in VERSION_SEEDS.items():
+        print(f"\nGenerating Version {ver} (seed={seed}) …")
+        qs = make_version(QUESTIONS, seed)
+        build_pdf(f"{out}/exam_student_{ver}.pdf", ver, qs, solution=False)
+        build_pdf(f"{out}/exam_solution_{ver}.pdf", ver, qs, solution=True)
+
+    print("\nDone. 6 files written.")
