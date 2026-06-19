@@ -17,6 +17,19 @@ from reportlab.platypus import (
     HRFlowable, KeepTogether, PageBreak,
 )
 from reportlab.lib.colors import HexColor, black, white
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase.pdfmetrics import registerFontFamily
+
+# Register Liberation Sans (metric-compatible with Helvetica/Arial) for full
+# Unicode coverage: subscripts (b0/b1), Greek epsilon, arrows, true minus sign.
+_LIB = "/usr/share/fonts/truetype/liberation"
+pdfmetrics.registerFont(TTFont("LibSans",          f"{_LIB}/LiberationSans-Regular.ttf"))
+pdfmetrics.registerFont(TTFont("LibSans-Bold",     f"{_LIB}/LiberationSans-Bold.ttf"))
+pdfmetrics.registerFont(TTFont("LibSans-Ital",     f"{_LIB}/LiberationSans-Italic.ttf"))
+pdfmetrics.registerFont(TTFont("LibSans-BoldItal", f"{_LIB}/LiberationSans-BoldItalic.ttf"))
+registerFontFamily("LibSans", normal="LibSans", bold="LibSans-Bold",
+                   italic="LibSans-Ital", boldItalic="LibSans-BoldItal")
 
 # ── Colours ──────────────────────────────────────────────────────────────────
 BLUE   = HexColor("#1a3a6b")
@@ -591,26 +604,26 @@ def shuffle_version(questions, seed):
 # ── Styles ────────────────────────────────────────────────────────────────────
 def make_styles(ver_color):
     return {
-        "title":      ParagraphStyle("title",      fontSize=17, fontName="Helvetica-Bold",   textColor=ver_color, alignment=TA_CENTER, spaceAfter=3),
-        "ver_badge":  ParagraphStyle("ver_badge",  fontSize=28, fontName="Helvetica-Bold",   textColor=ver_color, alignment=TA_CENTER),
-        "subtitle":   ParagraphStyle("subtitle",   fontSize=10, fontName="Helvetica",        textColor=DGRAY, alignment=TA_CENTER, spaceAfter=2),
-        "section":    ParagraphStyle("section",    fontSize=9,  fontName="Helvetica-Bold",   textColor=white, leading=12),
-        "qnum":       ParagraphStyle("qnum",       fontSize=10, fontName="Helvetica-Bold",   textColor=ver_color, spaceBefore=3, spaceAfter=1),
-        "qde":        ParagraphStyle("qde",        fontSize=10, fontName="Helvetica-Bold",   textColor=black, leading=13, spaceAfter=2),
-        "qen":        ParagraphStyle("qen",        fontSize=8.5,fontName="Helvetica-Oblique",textColor=DGRAY, leading=11, spaceAfter=3),
-        "opt_de":     ParagraphStyle("opt_de",     fontSize=9.5,fontName="Helvetica",        textColor=black, leading=12),
-        "opt_en":     ParagraphStyle("opt_en",     fontSize=8,  fontName="Helvetica-Oblique",textColor=DGRAY, leading=10),
-        "opt_de_c":   ParagraphStyle("opt_de_c",   fontSize=9.5,fontName="Helvetica-Bold",   textColor=GREEN, leading=12),
-        "opt_en_c":   ParagraphStyle("opt_en_c",   fontSize=8,  fontName="Helvetica-BoldOblique", textColor=GREEN, leading=10),
-        "hdr_label":  ParagraphStyle("hdr_label",  fontSize=9,  fontName="Helvetica-Bold",   textColor=DGRAY),
-        "hdr_line":   ParagraphStyle("hdr_line",   fontSize=9,  fontName="Helvetica",        textColor=DGRAY),
-        "footer":     ParagraphStyle("footer",     fontSize=7.5,fontName="Helvetica",        textColor=DGRAY, alignment=TA_CENTER),
-        "sol_warn":   ParagraphStyle("sol_warn",   fontSize=10, fontName="Helvetica-Bold",   textColor=RED, alignment=TA_CENTER, spaceBefore=4, spaceAfter=6),
-        "sh_title":   ParagraphStyle("sh_title",   fontSize=12, fontName="Helvetica-Bold",   textColor=ver_color, alignment=TA_CENTER, spaceAfter=5),
-        "sh_hdr":     ParagraphStyle("sh_hdr",     fontSize=9,  fontName="Helvetica-Bold",   textColor=white, alignment=TA_CENTER, leading=11),
-        "sh_cell":    ParagraphStyle("sh_cell",    fontSize=9,  fontName="Helvetica",        textColor=black, alignment=TA_CENTER, leading=11),
-        "sh_cell_c":  ParagraphStyle("sh_cell_c",  fontSize=10, fontName="Helvetica-Bold",   textColor=white, alignment=TA_CENTER, leading=11),
-        "sh_q":       ParagraphStyle("sh_q",       fontSize=9,  fontName="Helvetica-Bold",   textColor=ver_color, alignment=TA_CENTER, leading=11),
+        "title":      ParagraphStyle("title",      fontSize=17, fontName="LibSans-Bold",   textColor=ver_color, alignment=TA_CENTER, spaceAfter=3),
+        "ver_badge":  ParagraphStyle("ver_badge",  fontSize=28, fontName="LibSans-Bold",   textColor=ver_color, alignment=TA_CENTER),
+        "subtitle":   ParagraphStyle("subtitle",   fontSize=10, fontName="LibSans",        textColor=DGRAY, alignment=TA_CENTER, spaceAfter=2),
+        "section":    ParagraphStyle("section",    fontSize=9,  fontName="LibSans-Bold",   textColor=white, leading=12),
+        "qnum":       ParagraphStyle("qnum",       fontSize=10, fontName="LibSans-Bold",   textColor=ver_color, spaceBefore=3, spaceAfter=1),
+        "qde":        ParagraphStyle("qde",        fontSize=10, fontName="LibSans-Bold",   textColor=black, leading=13, spaceAfter=2),
+        "qen":        ParagraphStyle("qen",        fontSize=8.5,fontName="LibSans-Ital",textColor=DGRAY, leading=11, spaceAfter=3),
+        "opt_de":     ParagraphStyle("opt_de",     fontSize=9.5,fontName="LibSans",        textColor=black, leading=12),
+        "opt_en":     ParagraphStyle("opt_en",     fontSize=8,  fontName="LibSans-Ital",textColor=DGRAY, leading=10),
+        "opt_de_c":   ParagraphStyle("opt_de_c",   fontSize=9.5,fontName="LibSans-Bold",   textColor=GREEN, leading=12),
+        "opt_en_c":   ParagraphStyle("opt_en_c",   fontSize=8,  fontName="LibSans-BoldItal", textColor=GREEN, leading=10),
+        "hdr_label":  ParagraphStyle("hdr_label",  fontSize=9,  fontName="LibSans-Bold",   textColor=DGRAY),
+        "hdr_line":   ParagraphStyle("hdr_line",   fontSize=9,  fontName="LibSans",        textColor=DGRAY),
+        "footer":     ParagraphStyle("footer",     fontSize=7.5,fontName="LibSans",        textColor=DGRAY, alignment=TA_CENTER),
+        "sol_warn":   ParagraphStyle("sol_warn",   fontSize=10, fontName="LibSans-Bold",   textColor=RED, alignment=TA_CENTER, spaceBefore=4, spaceAfter=6),
+        "sh_title":   ParagraphStyle("sh_title",   fontSize=12, fontName="LibSans-Bold",   textColor=ver_color, alignment=TA_CENTER, spaceAfter=5),
+        "sh_hdr":     ParagraphStyle("sh_hdr",     fontSize=9,  fontName="LibSans-Bold",   textColor=white, alignment=TA_CENTER, leading=11),
+        "sh_cell":    ParagraphStyle("sh_cell",    fontSize=9,  fontName="LibSans",        textColor=black, alignment=TA_CENTER, leading=11),
+        "sh_cell_c":  ParagraphStyle("sh_cell_c",  fontSize=10, fontName="LibSans-Bold",   textColor=white, alignment=TA_CENTER, leading=11),
+        "sh_q":       ParagraphStyle("sh_q",       fontSize=9,  fontName="LibSans-Bold",   textColor=ver_color, alignment=TA_CENTER, leading=11),
     }
 
 
@@ -725,7 +738,7 @@ def answer_sheet(version, questions, S, vc, solution=False):
             rows.append(row)
         t = Table(rows, colWidths=[1.6*cm,1.4*cm,1.4*cm,1.4*cm,1.4*cm], repeatRows=1)
         cmds = [("BACKGROUND",(0,0),(-1,0),vc),("TEXTCOLOR",(0,0),(-1,0),white),
-                ("FONTNAME",(0,0),(-1,0),"Helvetica-Bold"),("FONTSIZE",(0,0),(-1,-1),9),
+                ("FONTNAME",(0,0),(-1,0),"LibSans-Bold"),("FONTSIZE",(0,0),(-1,-1),9),
                 ("ALIGN",(0,0),(-1,-1),"CENTER"),("VALIGN",(0,0),(-1,-1),"MIDDLE"),
                 ("ROWBACKGROUNDS",(0,1),(-1,-1),[LGRAY,white]),
                 ("GRID",(0,0),(-1,-1),0.5,MGRAY),
@@ -774,7 +787,7 @@ def build_pdf(path, version, questions, solution=False):
     label = "Lösungsschlüssel" if solution else "Prüfungsbogen"
     def footer(canvas, doc):
         canvas.saveState()
-        canvas.setFont("Helvetica", 7)
+        canvas.setFont("LibSans", 7)
         canvas.setFillColor(DGRAY)
         w, _ = A4
         canvas.drawCentredString(w/2, 1.0*cm,
