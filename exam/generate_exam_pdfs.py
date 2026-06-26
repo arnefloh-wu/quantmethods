@@ -39,13 +39,17 @@ DGRAY  = HexColor("#555555")
 GREEN  = HexColor("#1a7a3a")
 LGREEN = HexColor("#d4edda")
 RED    = HexColor("#cc0000")
-VERSION_COLORS = {"A": HexColor("#1a3a6b"), "B": HexColor("#7b1a1a"), "C": HexColor("#1a5c1a")}
+VERSION_COLORS = {
+    "A": HexColor("#1a3a6b"), "B": HexColor("#7b1a1a"), "C": HexColor("#1a5c1a"),
+    "D": HexColor("#5c1a7b"), "E": HexColor("#1a5c5c"),
+}
 
 LETTERS = ["A", "B", "C", "D"]
 
 # Seeds — fixed for full reproducibility
-GROUP_SEED   = 999   # determines which 4 questions per topic go to each version
-VERSION_SEEDS = {"A": 101, "B": 202, "C": 303}  # shuffle order + answers within version
+GROUP_SEED     = 999  # non-overlapping draw for A/B/C from MASTER_POOL
+GROUP_SEED_NEW = 888  # non-overlapping draw for D/E from NEW_POOL
+VERSION_SEEDS  = {"A": 101, "B": 202, "C": 303, "D": 404, "E": 505}
 
 # ── Master bilingual question pool (12 per topic × 5 topics) ─────────────────
 # Format: (topic, question_de, question_en, [opts_de×4], [opts_en×4], correct_idx)
@@ -555,6 +559,353 @@ MASTER_POOL = {
 }  # end MASTER_POOL
 
 
+# ── NEW_POOL: 40 additional bilingual questions (8/topic) for Versions D & E ──
+# Drawn from mc_questions_100.md entries not already in MASTER_POOL.
+NEW_POOL = {
+
+# ════════════════════════════════════════════════════════════════════════════════
+"Statistik / Statistics": [
+    (
+        "Statistik / Statistics",
+        "Welches Merkmal unterscheidet eine Intervallskala von einer Ordinalskala?",
+        "Which of the following is a key characteristic that distinguishes an interval scale from an ordinal scale?",
+        ["Intervallskalen haben einen fixen Nullpunkt", "Intervallskalen erlauben die Berechnung von Verhältnissen", "Abstände zwischen Werten können bedeutsam verglichen werden", "Intervallskalen erlauben nur Rangordnungen"],
+        ["Interval scales have a fixed zero point", "Interval scales allow computation of ratios", "Differences between scores can be meaningfully compared", "Interval scales only allow rank ordering"],
+        2,
+    ),
+    (
+        "Statistik / Statistics",
+        "Welche Eigenschaft unterscheidet eine Ratioskala von einer Intervallskala?",
+        "What is the key property that distinguishes a ratio scale from an interval scale?",
+        ["Ratioskalen erlauben Rangordnungen", "Ratioskalen erlauben bedeutsame Differenzen", "Ratioskalen haben einen willkürlichen Nullpunkt", "Ratioskalen haben einen fixen, nicht-willkürlichen Nullpunkt"],
+        ["Ratio scales allow rank ordering", "Ratio scales allow meaningful differences", "Ratio scales have an arbitrary zero point", "Ratio scales have a fixed, non-arbitrary zero point"],
+        3,
+    ),
+    (
+        "Statistik / Statistics",
+        "Welches Maß der zentralen Tendenz ist am geeignetsten für Nominaldaten?",
+        "Which measure of central tendency is most appropriate for nominal data?",
+        ["Mittelwert", "Median", "Modus", "Standardabweichung"],
+        ["Mean", "Median", "Mode", "Standard deviation"],
+        2,
+    ),
+    (
+        "Statistik / Statistics",
+        "Der Mittelwert der folgenden Werte – 22, 40, 53, 57, 93, 98, 103, 108, 116, 121, 234 – beträgt in etwa:",
+        "The mean of the following scores — 22, 40, 53, 57, 93, 98, 103, 108, 116, 121, 234 — is closest to:",
+        ["103", "95", "98", "88"],
+        ["103", "95", "98", "88"],
+        1,
+    ),
+    (
+        "Statistik / Statistics",
+        "Welches Streuungsmaß wird in denselben Einheiten wie die ursprüngliche Variable ausgedrückt?",
+        "Which measure of dispersion is expressed in the same units as the original variable?",
+        ["Varianz", "Summe der quadrierten Fehler", "Standardabweichung", "Variationskoeffizient"],
+        ["Variance", "Sum of squared errors", "Standard deviation", "Coefficient of variation"],
+        2,
+    ),
+    (
+        "Statistik / Statistics",
+        "Die Varianz wird berechnet als:",
+        "Variance is calculated as:",
+        ["Die Quadratwurzel der Summe quadrierter Abweichungen", "Die Summe absoluter Abweichungen vom Mittelwert", "Die Summe quadrierter Abweichungen dividiert durch (n − 1)", "Die Spannweite dividiert durch die Anzahl der Beobachtungen"],
+        ["The square root of the sum of squared deviations", "The sum of absolute deviations from the mean", "The sum of squared deviations divided by (n − 1)", "The range divided by the number of observations"],
+        2,
+    ),
+    (
+        "Statistik / Statistics",
+        "Ein Fehler 2. Art (Beta-Fehler) tritt auf, wenn:",
+        "A Type II error (beta error) occurs when:",
+        ["Die Nullhypothese wahr ist und korrekt beibehalten wird", "Die Nullhypothese wahr ist, aber fälschlicherweise abgelehnt wird", "Die Nullhypothese falsch ist und korrekt abgelehnt wird", "Die Nullhypothese falsch ist, aber fälschlicherweise beibehalten wird"],
+        ["The null hypothesis is true and is correctly retained", "The null hypothesis is true but is incorrectly rejected", "The null hypothesis is false and is correctly rejected", "The null hypothesis is false but is incorrectly retained"],
+        3,
+    ),
+    (
+        "Statistik / Statistics",
+        "Ein p-Wert von 0,069 wird bei einem Signifikanzniveau von Alpha = 0,05 erzielt. Die richtige Entscheidung ist:",
+        "A p-value of 0.069 is obtained in a study using alpha = 0.05. The correct decision is:",
+        ["H₀ ablehnen; das Ergebnis ist signifikant", "H₀ annehmen; das Ergebnis ist signifikant", "H₀ nicht ablehnen; das Ergebnis ist nicht signifikant", "Hₐ annehmen; das Ergebnis ist signifikant"],
+        ["Reject H₀; the result is significant", "Accept H₀; the result is significant", "Fail to reject H₀; the result is not significant", "Accept Ha; the result is significant"],
+        2,
+    ),
+],
+
+# ════════════════════════════════════════════════════════════════════════════════
+"Regressionsanalyse / Regression Analysis": [
+    (
+        "Regressionsanalyse / Regression Analysis",
+        "Wenn R² = 0,919 beträgt, bedeutet dies:",
+        "If R² = 0.919, this means:",
+        ["91,9 % der Vorhersagen sind korrekt", "Das Modell weist 91,9 signifikante Koeffizienten auf", "91,9 % der Varianz in Y wird durch die Prädiktoren erklärt", "8,1 % der Varianz wird erklärt"],
+        ["91.9% of predictions are correct", "The model has 91.9 significant coefficients", "91.9% of the variance in Y is explained by the predictors", "8.1% of the variance is explained"],
+        2,
+    ),
+    (
+        "Regressionsanalyse / Regression Analysis",
+        "Multikollinearität in der Regression tritt auf, wenn:",
+        "Multicollinearity in regression occurs when:",
+        ["Unabhängige Variablen stark miteinander korreliert sind", "Die abhängige Variable mit den Residuen korreliert", "Die Residuen nicht normalverteilt sind", "Die Stichprobengröße zu klein ist"],
+        ["Independent variables are highly correlated with each other", "The dependent variable is correlated with the residuals", "The residuals are not normally distributed", "The sample size is too small"],
+        0,
+    ),
+    (
+        "Regressionsanalyse / Regression Analysis",
+        "Welche diagnostische Kennzahl wird zur Erkennung von Multikollinearität verwendet?",
+        "Which diagnostic statistic is used to detect multicollinearity?",
+        ["Cook's Distance", "Durbin-Watson-Statistik", "Varianzinflationsfaktor (VIF)", "R²"],
+        ["Cook's Distance", "Durbin-Watson statistic", "Variance Inflation Factor (VIF)", "R²"],
+        2,
+    ),
+    (
+        "Regressionsanalyse / Regression Analysis",
+        "Ein Durbin-Watson-Wert von etwa 2 zeigt an:",
+        "A Durbin-Watson value of approximately 2 indicates:",
+        ["Starke positive Autokorrelation", "Keine Autokorrelation", "Starke negative Autokorrelation", "Heteroskedastizität"],
+        ["Strong positive autocorrelation", "No autocorrelation", "Strong negative autocorrelation", "Heteroscedasticity"],
+        1,
+    ),
+    (
+        "Regressionsanalyse / Regression Analysis",
+        "Heteroskedastizität in der Regression bezeichnet:",
+        "Heteroscedasticity in regression refers to:",
+        ["Korrelation zwischen unabhängigen Variablen", "Nicht-Normalverteilung der abhängigen Variablen", "Nicht-konstante Varianz der Residuen über die vorhergesagten Werte hinweg", "Korrelation zwischen Residuen und der abhängigen Variablen"],
+        ["Correlation among the independent variables", "Non-normality of the dependent variable", "Non-constant variance of the residuals across fitted values", "Correlation between residuals and the dependent variable"],
+        2,
+    ),
+    (
+        "Regressionsanalyse / Regression Analysis",
+        "Welches Modell ist geeignet, wenn der Forscher erwartet, dass der Effekt von X auf Y einem multiplikativen (statt additiven) Muster folgt?",
+        "Which model is appropriate when the researcher expects the effect of X on Y to follow a multiplicative (rather than additive) pattern?",
+        ["Lineares Regressionsmodell", "Logistisches Regressionsmodell", "Log-Log-Regressionsmodell", "Dummy-Variablen-Regressionsmodell"],
+        ["Linear regression model", "Logistic regression model", "Log-log regression model", "Dummy variable regression model"],
+        2,
+    ),
+    (
+        "Regressionsanalyse / Regression Analysis",
+        "Welche der folgenden Aussagen ist KEINE Annahme der OLS-Regression?",
+        "Which of the following is NOT an assumption of OLS regression?",
+        ["Linearität zwischen Prädiktoren und Zielvariable", "Unabhängigkeit der Residuen", "Homoskedastizität der Residuen", "Residuen müssen einer Gleichverteilung folgen"],
+        ["Linearity between predictors and outcome", "Independence of residuals", "Homoscedasticity of residuals", "Residuals must follow a uniform distribution"],
+        3,
+    ),
+    (
+        "Regressionsanalyse / Regression Analysis",
+        "Der t-Test für einen einzelnen Regressionskoeffizienten prüft:",
+        "The t-test for an individual regression coefficient tests:",
+        ["Ob die gesamte Modellanpassung signifikant ist", "Ob ein spezifischer Prädiktor über die anderen Prädiktoren hinaus signifikant Varianz in Y erklärt", "Ob die Residuen autokorreliert sind", "Ob Multikollinearität unter den Prädiktoren besteht"],
+        ["Whether the overall model fit is significant", "Whether a specific predictor significantly explains variance in Y beyond the other predictors", "Whether the residuals are autocorrelated", "Whether multicollinearity exists among predictors"],
+        1,
+    ),
+],
+
+# ════════════════════════════════════════════════════════════════════════════════
+"Mediation & Moderation": [
+    (
+        "Mediation & Moderation",
+        "Der Baron-&-Kenny-Ansatz (1986) verlangte welchen Schritt, den Zhao, Lynch & Chen (2010) als unnötig bezeichnen?",
+        "The Baron & Kenny (1986) approach required which step that Zhao, Lynch & Chen (2010) argue is unnecessary?",
+        ["Prüfung von Pfad a (X → M)", "Prüfung von Pfad b (M → Y)", "Prüfung des Gesamteffekts (Pfad c, X → Y) vor dem Nachweis der Mediation", "Prüfung des indirekten Effekts a×b"],
+        ["Testing path a (X → M)", "Testing path b (M → Y)", "Testing the total effect (path c, X → Y) before establishing mediation", "Testing the indirect effect a×b"],
+        2,
+    ),
+    (
+        "Mediation & Moderation",
+        "'Ausschließlich indirekte Mediation' entspricht welchem Begriff von Baron & Kenny?",
+        '"Indirect-only mediation" corresponds to which Baron & Kenny term?',
+        ["Partielle Mediation", "Vollständige Mediation", "Nicht-Mediation", "Kompetitive Mediation"],
+        ["Partial mediation", "Full mediation", "Non-mediation", "Competitive mediation"],
+        1,
+    ),
+    (
+        "Mediation & Moderation",
+        "In der Typologie von Zhao, Lynch & Chen (2010): Was bedeutet ein signifikanter direkter Effekt c' ohne einen signifikanten indirekten Effekt?",
+        "In Zhao, Lynch & Chen (2010)'s typology, what does a significant direct effect c' without a significant indirect effect indicate?",
+        ["Komplementäre Mediation", "Ausschließlich indirekte Mediation", "Ausschließlich direkte Nicht-Mediation", "Keine-Effekt-Nicht-Mediation"],
+        ["Complementary mediation", "Indirect-only mediation", "Direct-only non-mediation", "No-effect non-mediation"],
+        2,
+    ),
+    (
+        "Mediation & Moderation",
+        "Der Sobel-Test ist kritisiert worden, weil:",
+        "The Sobel test has been criticized because:",
+        ["Er Bootstrapping erfordert", "Er annimmt, dass der indirekte Effekt a×b normalverteilt ist, was häufig verletzt wird", "Er nicht mit Strukturgleichungsmodellen verwendet werden kann", "Er nur mit Ratioskalen-Variablen funktioniert"],
+        ["It requires bootstrapping", "It assumes that the indirect effect a×b is normally distributed, which is often violated", "It cannot be used with structural equation modeling", "It only works with ratio-scale variables"],
+        1,
+    ),
+    (
+        "Mediation & Moderation",
+        "Im Mediationsmodell repräsentiert Pfad c':",
+        "In a mediation model, path c' represents:",
+        ["Den Gesamteffekt von X auf Y", "Den Effekt von X auf den Mediator M", "Den direkten Effekt von X auf Y unter Kontrolle von M", "Den Effekt von M auf Y ohne Kontrolle von X"],
+        ["The total effect of X on Y", "The effect of X on the mediator M", "The direct effect of X on Y controlling for M", "The effect of M on Y without controlling for X"],
+        2,
+    ),
+    (
+        "Mediation & Moderation",
+        "'Keine-Effekt-Nicht-Mediation' im Rahmen von Zhao, Lynch & Chen (2010) bedeutet:",
+        '"No-effect non-mediation" in Zhao, Lynch & Chen (2010)\'s framework means:',
+        ["Es gibt einen signifikanten direkten Effekt, aber keinen indirekten Effekt", "Es gibt einen signifikanten indirekten Effekt, aber keinen direkten Effekt", "Weder der indirekte noch der direkte Effekt ist signifikant", "Sowohl indirekte als auch direkte Effekte sind in entgegengesetzter Richtung signifikant"],
+        ["There is a significant direct effect but no indirect effect", "There is a significant indirect effect but no direct effect", "Neither the indirect effect nor the direct effect is significant", "Both the indirect and direct effects are significant in opposite directions"],
+        2,
+    ),
+    (
+        "Mediation & Moderation",
+        "Eine Floodlight-Analyse in der Moderationsforschung dient dazu:",
+        "A floodlight analysis in moderation research is used to:",
+        ["Indirekte Effekte auf allen Ebenen des Moderators zu testen", "Den Bereich der Moderatorwerte zu identifizieren, für den der Effekt von X auf Y signifikant ist", "Zu bestimmen, welche Mediatoren in ein Modell aufzunehmen sind", "Multikollinearität in Moderationsmodellen zu testen"],
+        ["Test indirect effects across all levels of the moderator", "Identify the range of moderator values for which the effect of X on Y is significant", "Determine which mediators to include in a model", "Test for multicollinearity in moderation models"],
+        1,
+    ),
+    (
+        "Mediation & Moderation",
+        "Welches Software-Paket wird häufig für Mediations- und Moderationsanalysen in SPSS und R verwendet?",
+        "Which software package is commonly used for mediation and moderation analysis in SPSS and R?",
+        ["Amos", "PROCESS-Makro (Andrew Hayes)", "SmartPLS", "Nur lavaan"],
+        ["Amos", "PROCESS macro (Andrew Hayes)", "SmartPLS", "lavaan only"],
+        1,
+    ),
+],
+
+# ════════════════════════════════════════════════════════════════════════════════
+"Survey-Forschung / Survey Research": [
+    (
+        "Survey-Forschung / Survey Research",
+        "Welches der Folgenden ist KEIN wirksames prozedurales Mittel gegen Common Method Bias?",
+        "Which of the following is NOT an effective procedural remedy for Common Method Bias?",
+        ["Verschiedene Datenquellen für Prädiktor- und Ergebnisvariablen verwenden", "Zeitliche Trennung zwischen der Messung von Prädiktor und Ergebnis", "Unterschiedliche Skalenformate für verschiedene Konstrukte verwenden", "Die Stichprobengröße erhöhen"],
+        ["Using different data sources for predictor and outcome variables", "Temporal separation between measurement of predictor and outcome", "Using different scale formats for different constructs", "Increasing the sample size"],
+        3,
+    ),
+    (
+        "Survey-Forschung / Survey Research",
+        "Soziale Erwünschtheitsverzerrung bezeichnet:",
+        "Social desirability bias refers to:",
+        ["Die Tendenz der Befragten, extreme Antwortoptionen zu wählen", "Die Tendenz der Befragten, auf eine sozial akzeptable Weise zu antworten statt wahrheitsgemäß", "Befragte, die zu verschiedenen Zeitpunkten unterschiedliche Antworten geben", "Befragte, die Skalenpunkte falsch interpretieren"],
+        ["Respondents' tendency to select extreme response options", "Respondents' tendency to answer in ways they believe are socially acceptable rather than truthfully", "Respondents providing different answers at different points in time", "Respondents misunderstanding scale anchors"],
+        1,
+    ),
+    (
+        "Survey-Forschung / Survey Research",
+        "Gemäß dem kognitiven Modell der Umfragebearbeitung nach Tourangeau et al.: In welcher Reihenfolge verarbeiten Befragte Umfragefragen?",
+        "According to Tourangeau et al.'s cognitive model of survey response, in what order do respondents process survey questions?",
+        ["Urteilsbildung → Verständnis → Abruf → Formatierung → Bearbeitung", "Abruf → Verständnis → Urteilsbildung → Bearbeitung → Formatierung", "Verständnis → Abruf → Urteilsbildung → Formatierung → Bearbeitung", "Verständnis → Urteilsbildung → Abruf → Bearbeitung → Formatierung"],
+        ["Judgment → Comprehension → Retrieval → Formatting → Editing", "Retrieval → Comprehension → Judgment → Editing → Formatting", "Comprehension → Retrieval → Judgment → Formatting → Editing", "Comprehension → Judgment → Retrieval → Editing → Formatting"],
+        2,
+    ),
+    (
+        "Survey-Forschung / Survey Research",
+        "Wie viele Items pro Konstrukt werden mindestens empfohlen, um eine zuverlässige Messung sicherzustellen?",
+        "A minimum of how many items per construct is generally recommended to ensure reliable measurement?",
+        ["1–2 Items", "4–6 Items", "8–10 Items", "12–15 Items"],
+        ["1–2 items", "4–6 items", "8–10 items", "12–15 items"],
+        1,
+    ),
+    (
+        "Survey-Forschung / Survey Research",
+        "Welcher Schwellenwert für Cronbachs Alpha (oder Komposit-Reliabilität) wird konventionell gefordert, um eine Skala als reliabel zu betrachten?",
+        "What threshold value of Cronbach's alpha (or Composite Reliability) is conventionally required to consider a scale reliable?",
+        ["> 0,50", "> 0,70", "> 0,90", "> 0,95"],
+        ["> 0.50", "> 0.70", "> 0.90", "> 0.95"],
+        1,
+    ),
+    (
+        "Survey-Forschung / Survey Research",
+        "Diskriminanzvalidität ist gegeben, wenn:",
+        "Discriminant validity is demonstrated when:",
+        ["Items innerhalb eines Konstrukts stark korreliert sind", "Maße unterschiedlicher Konstrukte geringe Korrelationen untereinander aufweisen", "Die Skala über die Zeit konsistente Ergebnisse liefert", "Die durchschnittlich extrahierte Varianz die Reliabilität des Konstrukts übersteigt"],
+        ["Items within a construct are highly correlated", "Measures of distinct constructs show low correlations with each other", "The scale produces consistent results across time", "The average variance extracted exceeds the construct's reliability"],
+        1,
+    ),
+    (
+        "Survey-Forschung / Survey Research",
+        "Welche der folgenden Beschreibungen trifft am besten auf Augenscheinvalidität (Face Validity) zu?",
+        "Which of the following best describes face validity?",
+        ["Items korrelieren stark mit einem externen Kriterium", "Items innerhalb eines Konstrukts weisen hohe Interkorrelationen auf", "Ein oberflächliches Urteil, dass die Items zu messen scheinen, was sie messen sollen", "Die Skala sagt theoretisch verwandte Ergebnisse vorher"],
+        ["Items correlate highly with an external criterion", "Items within a construct are highly intercorrelated", "A superficial judgment that items appear to measure what they are supposed to measure", "The scale predicts theoretically related outcomes"],
+        2,
+    ),
+    (
+        "Survey-Forschung / Survey Research",
+        "Nicht-Stichprobenfehler in der Umfrageforschung umfassen alle der folgenden AUSSER:",
+        "Non-sampling errors in survey research include all of the following EXCEPT:",
+        ["Messfehler durch schlecht formulierte Fragen", "Non-Response-Bias", "Key-Informant-Bias", "Fehler des Auswahlrahmens, die die Stichprobe nicht-repräsentativ machen"],
+        ["Measurement error from poorly worded questions", "Non-response bias", "Key informant bias", "Sampling frame errors that make the sample non-representative"],
+        3,
+    ),
+],
+
+# ════════════════════════════════════════════════════════════════════════════════
+"Internationales Marketing / International Marketing": [
+    (
+        "Internationales Marketing / International Marketing",
+        "Der 'adaptierte etische' Ansatz kombiniert:",
+        'The "adapted etic" approach combines:',
+        ["Emische Konstrukte aus mehreren Kulturen", "Etische Maße, die ohne jegliche Anpassung angewendet werden", "Einen universellen Rahmen, der außerhalb einer Kultur entwickelt wurde, aber an lokale kulturelle Kontexte angepasst wird", "Mehrere verknüpfte emische Ansätze, die gleichzeitig angewendet werden"],
+        ["Emic constructs from multiple cultures", "Etic measures applied without any adaptation", "A universal framework developed outside a culture but adapted to fit local cultural contexts", "Multiple linked emic approaches applied simultaneously"],
+        2,
+    ),
+    (
+        "Internationales Marketing / International Marketing",
+        "Das Konzept der 'Culti-Unit' in der internationalen Marketingforschung bezeichnet:",
+        'The "culti-unit" concept in international marketing research refers to:',
+        ["Eine Einheit kultureller Analyse, die durch nationale Grenzen definiert ist", "Jede bedeutungsvolle Einheit kultureller Analyse (die nicht unbedingt mit nationalen Grenzen übereinstimmt)", "Eine einzelne Kulturdimension für kulturvergleichende Analysen", "Die Analyseeinheit in Hofstedes Modell"],
+        ["A unit of cultural analysis defined by national borders", "Any meaningful unit of cultural analysis (which may not align with national boundaries)", "A single cultural dimension used for cross-cultural comparison", "The unit of analysis in Hofstede's model"],
+        1,
+    ),
+    (
+        "Internationales Marketing / International Marketing",
+        "Appadurai (1990) schlug fünf globale 'Scapes' oder Flüsse vor. Welcher der folgenden ist KEINER davon?",
+        'Appadurai (1990) proposed five global "scapes" or flows. Which of the following is NOT one of them?',
+        ["Technoscapes", "Financescapes", "Mediascapes", "Politiscapes"],
+        ["Technoscapes", "Financescapes", "Mediascapes", "Politiscapes"],
+        3,
+    ),
+    (
+        "Internationales Marketing / International Marketing",
+        "Das GLOBE-Projekt erweiterte die Kulturforschung um wie viele Kulturdimensionen?",
+        "The GLOBE project extended cultural research by including how many cultural dimensions?",
+        ["4", "6", "7", "9"],
+        ["4", "6", "7", "9"],
+        3,
+    ),
+    (
+        "Internationales Marketing / International Marketing",
+        "Rückübersetzung ('Back-Translation') in der Umfrageforschung beinhaltet:",
+        "Back-translation in survey research involves:",
+        ["Native Speaker bitten, den Original-Fragebogen von Grund auf neu zu schreiben", "Einen Fragebogen in eine Zielsprache zu übersetzen und dann zurück in die Ausgangssprache, um Diskrepanzen zu überprüfen", "Zwei unabhängige Übersetzer den Fragebogen jeweils übersetzen zu lassen und ihre Versionen zu vergleichen", "Den Fragebogen simultan in mehreren Sprachen zu erheben"],
+        ["Having native speakers re-write the original questionnaire from scratch", "Translating a questionnaire into a target language and then translating it back to the source language to check for discrepancies", "Having two independent translators each translate the questionnaire and comparing their versions", "Administering the questionnaire in multiple languages simultaneously"],
+        1,
+    ),
+    (
+        "Internationales Marketing / International Marketing",
+        "Der kulturübergreifende Extreme Response Style (ERS) ist am problematischsten, weil:",
+        "Extreme Response Style (ERS) across cultures is most problematic because:",
+        ["Er Cronbachs Alpha künstlich erhöht", "Er zu scheinbar, aber spuriosen kulturübergreifenden Mittelwertunterschieden führen kann, wenn Kulturen unterschiedlich dazu neigen, extreme Skalenpunkte zu verwenden", "Er die Varianz in Antworten auf null reduziert", "Er die Annahme zufälliger Messfehler verletzt"],
+        ["It increases Cronbach's alpha artificially", "It can lead to apparent but spurious cross-cultural differences in mean scores if cultures differ in their tendencies to use extreme scale points", "It reduces variance in responses to zero", "It violates the assumption of random measurement error"],
+        1,
+    ),
+    (
+        "Internationales Marketing / International Marketing",
+        "Funktionale Äquivalenz in der kulturvergleichenden Forschung bedeutet:",
+        "Functional equivalence in cross-cultural research means:",
+        ["Das Konstrukt erfüllt dieselbe Funktion oder denselben Zweck in allen verglichenen Kulturen", "Die Items zur Messung eines Konstrukts sind in allen Kulturen identisch", "Die Faktorladungen sind in allen Kulturen äquivalent", "Das Konstrukt wird in allen Kulturen mit demselben Skalenformat gemessen"],
+        ["The construct serves the same function or purpose in all cultures under comparison", "The items measuring a construct are identical across cultures", "The factor loadings are equivalent across cultures", "The construct is measured using the same scale format across cultures"],
+        0,
+    ),
+    (
+        "Internationales Marketing / International Marketing",
+        "Eine zentrale Herausforderung des 'verknüpften emischen' Ansatzes in der kulturvergleichenden Forschung ist:",
+        'A key challenge of the "linked emic" approach to cross-cultural research is:',
+        ["Er stützt sich auf westlich entwickelte Konstrukte, die unverändert auf alle Kulturen angewendet werden", "Er funktioniert nur, wenn Kulturen dieselbe Sprache teilen", "Der Vergleich von Ergebnissen über Kulturen ist schwierig, da kulturspezifische Konstrukte möglicherweise nicht direkt aufeinander abbildbar sind", "Er erfordert identische Fragebögen in allen kulturellen Kontexten"],
+        ["It relies on Western-developed constructs applied unchanged to all cultures", "It only works when cultures share the same language", "Comparing results across cultures is difficult because culture-specific constructs may not map onto each other directly", "It requires identical questionnaires in all cultural contexts"],
+        2,
+    ),
+],
+
+}  # end NEW_POOL
+
+
 # ── Version selection: non-overlapping draw of 4 per topic ───────────────────
 def make_draws():
     """
@@ -570,6 +921,22 @@ def make_draws():
         draws["A"].extend(pool[0:4])
         draws["B"].extend(pool[4:8])
         draws["C"].extend(pool[8:12])
+    return draws
+
+
+def make_draws_new():
+    """
+    Shuffle each topic's 8 questions with GROUP_SEED_NEW, then assign
+    indices [0-3] → D, [4-7] → E.
+    Returns {version: [20 questions]}
+    """
+    rng = random.Random(GROUP_SEED_NEW)
+    draws = {"D": [], "E": []}
+    for topic, qs in NEW_POOL.items():
+        pool = list(qs)
+        rng.shuffle(pool)
+        draws["D"].extend(pool[0:4])
+        draws["E"].extend(pool[4:8])
     return draws
 
 
@@ -817,12 +1184,21 @@ if __name__ == "__main__":
     out = "/home/user/quantmethods/exam/exam-mc-questions"
     os.makedirs(out, exist_ok=True)
 
-    draws = make_draws()
+    draws     = make_draws()
+    draws_new = make_draws_new()
 
     # Print draw summary for transparency
     print(f"\nDraw summary (GROUP_SEED={GROUP_SEED}):")
     for ver in ["A","B","C"]:
         qs = draws[ver]
+        topics = {}
+        for q in qs:
+            topics[q[0]] = topics.get(q[0], 0) + 1
+        print(f"  Version {ver}: {dict(topics)}")
+
+    print(f"\nDraw summary (GROUP_SEED_NEW={GROUP_SEED_NEW}):")
+    for ver in ["D","E"]:
+        qs = draws_new[ver]
         topics = {}
         for q in qs:
             topics[q[0]] = topics.get(q[0], 0) + 1
@@ -834,4 +1210,10 @@ if __name__ == "__main__":
         build_pdf(f"{out}/exam_student_{ver}.pdf", ver, qs, solution=False)
         build_pdf(f"{out}/exam_solution_{ver}.pdf", ver, qs, solution=True)
 
-    print("\nDone. 6 files written.")
+    for ver in ["D", "E"]:
+        print(f"\nGenerating Version {ver} …")
+        qs = shuffle_version(draws_new[ver], VERSION_SEEDS[ver])
+        build_pdf(f"{out}/exam_student_{ver}.pdf", ver, qs, solution=False)
+        build_pdf(f"{out}/exam_solution_{ver}.pdf", ver, qs, solution=True)
+
+    print("\nDone. 10 files written.")
