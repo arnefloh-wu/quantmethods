@@ -591,11 +591,11 @@ NEW_POOL = {
     ),
     (
         "Statistik / Statistics",
-        "Der Mittelwert der folgenden Werte – 22, 40, 53, 57, 93, 98, 103, 108, 116, 121, 234 – beträgt in etwa:",
-        "The mean of the following scores — 22, 40, 53, 57, 93, 98, 103, 108, 116, 121, 234 — is closest to:",
-        ["103", "95", "98", "88"],
-        ["103", "95", "98", "88"],
-        1,
+        "Eine rechtschiefe (positiv schiefe) Verteilung ist dadurch gekennzeichnet, dass:",
+        "A positively skewed distribution is characterized by the fact that:",
+        ["Mittelwert = Median = Modus", "Mittelwert < Median", "Mittelwert > Median", "Die Verteilung keine Ausreißer aufweist"],
+        ["Mean = Median = Mode", "Mean < Median", "Mean > Median", "The distribution has no outliers"],
+        2,
     ),
     (
         "Statistik / Statistics",
